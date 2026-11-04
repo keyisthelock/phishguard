@@ -1,0 +1,45 @@
+{
+  "dataset": "UCI SMS Spam Collection",
+  "limitation": "SMS spam labels are a proxy for scam detection; not a validated phishing benchmark. Probabilities are not calibrated safety guarantees.",
+  "unique_messages": 5171,
+  "training_messages": 4136,
+  "test_messages": 1035,
+  "random_state": 42,
+  "metrics": {
+    "0": {
+      "precision": 0.9878048780487805,
+      "recall": 0.9856194690265486,
+      "f1-score": 0.9867109634551495,
+      "support": 904.0
+    },
+    "1": {
+      "precision": 0.9022556390977443,
+      "recall": 0.916030534351145,
+      "f1-score": 0.9090909090909091,
+      "support": 131.0
+    },
+    "accuracy": 0.9768115942028985,
+    "macro avg": {
+      "precision": 0.9450302585732624,
+      "recall": 0.9508250016888469,
+      "f1-score": 0.9479009362730293,
+      "support": 1035.0
+    },
+    "weighted avg": {
+      "precision": 0.9769769067419344,
+      "recall": 0.9768115942028985,
+      "f1-score": 0.9768865894245066,
+      "support": 1035.0
+    }
+  },
+  "confusion_matrix": [
+    [
+      891,
+      13
+    ],
+    [
+      11,
+      120
+    ]
+  ]
+}

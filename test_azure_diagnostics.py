@@ -1,3 +1,6 @@
+import sys
+from types import SimpleNamespace
+
 import requests
 import pytest
 from test_app import app,post
@@ -8,15 +11,30 @@ def test_offline_diagnostics_are_safe(monkeypatch):
     import config
     monkeypatch.setattr(config,'TRANSLATOR_KEY','private-placeholder-key')
     monkeypatch.setattr(config,'SQL_CONNECTION','private-placeholder-connection')
+    monkeypatch.setitem(sys.modules, 'pyodbc',
+                        SimpleNamespace(drivers=lambda: ['ODBC Driver 18 for SQL Server']))
     status=configuration_status()
+    assert status['odbc_driver_18'] == 'installed'
     assert 'private-placeholder' not in str(status)
     assert status['translator']=='configured, not verified'
 
 def test_sql_unconfigured_does_not_connect(monkeypatch):
-    import config,pyodbc
-    monkeypatch.setattr(config,'SQL_CONNECTION','')
-    monkeypatch.setattr(pyodbc,'connect',lambda *a,**kw:pytest.fail('Must not connect without configuration'))
+    import config
+    monkeypatch.setattr(config, 'SQL_CONNECTION', '')
+    monkeypatch.setitem(sys.modules, 'pyodbc', None)
     assert check_sql()['ok'] is False
+    assert 'not configured' in check_sql()['message']
+
+
+def test_missing_odbc_runtime_is_recoverable(monkeypatch):
+    import config
+    monkeypatch.setattr(config, 'SQL_CONNECTION', 'private-placeholder-connection')
+    monkeypatch.setitem(sys.modules, 'pyodbc', None)
+    assert configuration_status()['odbc_driver_18'] == 'not installed'
+    result = check_sql()
+    assert result['ok'] is False
+    assert 'system ODBC runtime' in result['message']
+    assert 'private-placeholder' not in str(result)
 
 @pytest.mark.parametrize('status,expected',[(401,'rejected the key'),(403,'denied'),(429,'quota')])
 def test_translation_errors_never_expose_keys(monkeypatch,status,expected):

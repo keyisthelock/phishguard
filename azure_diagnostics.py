@@ -4,14 +4,24 @@ import json
 import config
 from detector import translate
 
+def _load_odbc():
+    try:
+        import pyodbc
+    except (ImportError, OSError):
+        return None
+    return pyodbc
+
+
 def configuration_status():
-    import pyodbc
-    drivers=pyodbc.drivers()
+    pyodbc = _load_odbc()
+    drivers = pyodbc.drivers() if pyodbc else []
     return {'translator':'configured, not verified' if config.TRANSLATOR_KEY else 'not configured', 'translator_region':'configured' if config.TRANSLATOR_REGION else 'not configured', 'azure_sql':'configured, not verified' if config.SQL_CONNECTION else 'not configured', 'odbc_driver_18':'installed' if 'ODBC Driver 18 for SQL Server' in drivers else 'not installed'}
 
 def check_sql():
-    import pyodbc
     if not config.SQL_CONNECTION: return {'ok':False,'message':'Azure SQL is not configured. Follow AZURE_SETUP.md and set the encrypted connection string in .env.'}
+    pyodbc = _load_odbc()
+    if pyodbc is None:
+        return {'ok': False, 'message': 'Install the system ODBC runtime and Microsoft ODBC Driver 18 for SQL Server. See AZURE_SETUP.md.'}
     if 'ODBC Driver 18 for SQL Server' not in pyodbc.drivers(): return {'ok':False,'message':'Install Microsoft ODBC Driver 18 for SQL Server first.'}
     try:
         connection=pyodbc.connect(config.SQL_CONNECTION,timeout=10)

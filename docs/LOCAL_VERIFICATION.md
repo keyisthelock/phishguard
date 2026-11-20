@@ -11,3 +11,5 @@ python -m venv .venv
 On Windows, use `.venv\Scripts\python.exe`. The tests use Flask test clients, isolated SQLite data and fake external-service configuration. Translation and remote storage require separate credentials and integration testing. Use the checked-in classifier artifact and its matching package versions. Keep user-submitted serialized model files out of trusted model loading.
 
 The [project documentation](../PROJECT_DOCUMENTATION.md) describes app architecture. [Training code](../train_model.py) and [metrics](../models/metrics.json) document the packaged model's reported experiment.
+
+Azure SQL use also requires the system ODBC runtime and Microsoft ODBC Driver 18. The offline diagnostics handle an absent runtime.
